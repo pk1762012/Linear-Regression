@@ -54,35 +54,41 @@ class LinearRegOls:
     def adftests(self):
         self.regressionexecute()
         #heading()
+        print(pd.DataFrame(self.model.resid).describe())
+        print(self.model.resid)
+        #heading('Residual plot')
+        #print()
+        pd.DataFrame(self.model.resid).plot()
+        plt.show()
+        result = adfuller(self.model.resid, autolag='AIC')
+        print(f'ADF Statistic: {result[0]}')
+        print(f'n_lags: {result[1]}')
+        print(f'p-value: {result[1]}')
+        for key, value in result[4].items():
+            print('Critical Values:')
+            print(f'   {key}, {value}')
+
+
+    def residualsummary(self):
+        self.regressionexecute()
+        #heading('Summary statistics of residuals')
         pd.DataFrame(self.model.resid).describe()
         #heading('Residual plot')
         #print()
         pd.DataFrame(self.model.resid).plot()
         plt.show()
-        sm.graphics.tsa.plot_acf(DataFrame(self.model.resid), lags=10)
-        sm.graphics.tsa.plot_pacf(DataFrame(self.model.resid), lags= 10)
-        plt.show()
-
-    def residualsummary(self):
-        self.regressionexecute()
-        heading('Summary statistics of residuals')
-        print(self.model.resid.describe())
-        heading('Residual plot')
-        print()
-        self.model.resid.plot()
-        plt.show()
         sm.graphics.tsa.plot_acf(self.model.resid, lags = 10)
-        sm.graphics.tsa.plot_pacf(self.model.resid, lags= 10)
+        sm.graphics.tsa.plot_pacf(self.model.resid, lags = 10)
         plt.show()
 
     def bptest(self):
         self.regressionexecute()
-        heading('Breusch-Pagan Test')
+        #heading('Breusch-Pagan Test')
         print(smd.het_breuschpagan(self.model.resid, self.model.model.exog))
 
     def vif(self):
         self.regressionexecute()
-        heading('Test results of VIF')
+        #heading('Test results of VIF')
         vif = pd.DataFrame()
         if not self.constant:
             vif_X = sm.add_constant(self.X)
@@ -95,7 +101,7 @@ class LinearRegOls:
 
     def insample(self):
         self.regressionexecute()
-        heading('In sample fit')
+        #heading('In sample fit')
         ActvsPred: DataFrame = pd.DataFrame({'Actual': self.y.squeeze(), 'Predicted': self.model.predict(self.exog)})
         ActvsPred[['Actual', 'Predicted']].plot(figsize = (10,5))
         plt.show()
@@ -104,7 +110,7 @@ class LinearRegOls:
         print()
 
     def outsample(self):
-        heading(f'Out of Sample test: {self.OOS_begin} to {self.OOS_end}')
+        #heading(f'Out of Sample test: {self.OOS_begin} to {self.OOS_end}')
         self.regressionexecute()
         if (self.OOS_begin is None or self.OOS_end is None):
             X_Train = self.exog.iloc[:-12]
@@ -122,7 +128,7 @@ class LinearRegOls:
         else:
             self.model_OOS = sm.OLS(y_train, X_Train).fit(cov_type='HAC',cov_kwds={'maxlags':6})
 
-        heading('Out sample fit')
+        #heading('Out sample fit')
         ActvsPred = pd.DataFrame({'Actual':y_test.squeeze(),'Predicted':self.model.predict(X_test)})
         ActvsPred[['Actual','Predicted']].plot(figsize = figsize)
         plt.show()
