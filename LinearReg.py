@@ -77,8 +77,8 @@ class LinearRegOls:
         #print()
         pd.DataFrame(self.model.resid).plot()
         plt.show()
-        sm.graphics.tsa.plot_acf(self.model.resid, lags = 10)
-        sm.graphics.tsa.plot_pacf(self.model.resid, lags = 10)
+        sm.graphics.tsa.plot_acf(self.model.resid, lags = 3)
+        sm.graphics.tsa.plot_pacf(self.model.resid, lags = 3)
         plt.show()
 
     def bptest(self):
@@ -139,8 +139,8 @@ class LinearRegOls:
     def runall(self):
         self.regressionsummary()
         self.adftests()
-        #self.residualsummary()
-        #self.bptest()
+        self.residualsummary()
+        self.bptest()
         #self.vif()
         #self.insample()
         #self.outsample()
