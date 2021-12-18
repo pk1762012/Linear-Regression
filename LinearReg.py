@@ -54,10 +54,10 @@ class LinearRegOls:
     def adftests(self):
         self.regressionexecute()
         #heading()
-        print(pd.DataFrame(self.model.resid).describe())
-        print(self.model.resid)
+        #print(pd.DataFrame(self.model.resid).describe())
+        #print(self.model.resid)
         #heading('Residual plot')
-        #print()
+
         pd.DataFrame(self.model.resid).plot()
         plt.show()
         result = adfuller(self.model.resid, autolag='AIC')
@@ -72,7 +72,7 @@ class LinearRegOls:
     def residualsummary(self):
         self.regressionexecute()
         #heading('Summary statistics of residuals')
-        pd.DataFrame(self.model.resid).describe()
+        #pd.DataFrame(self.model.resid).describe()
         #heading('Residual plot')
         #print()
         pd.DataFrame(self.model.resid).plot()
@@ -102,7 +102,7 @@ class LinearRegOls:
     def insample(self):
         self.regressionexecute()
         #heading('In sample fit')
-        ActvsPred: DataFrame = pd.DataFrame({'Actual': self.y.squeeze(), 'Predicted': self.model.predict(self.exog)})
+        ActvsPred = pd.DataFrame({'Actual': self.y.squeeze(), 'Predicted': self.model.predict(self.exog)})
         ActvsPred[['Actual', 'Predicted']].plot(figsize = (10,5))
         plt.show()
         InSampleRMSE = np.sqrt(((ActvsPred['Actual'] - ActvsPred['Predicted'])**2).mean())
@@ -129,8 +129,10 @@ class LinearRegOls:
             self.model_OOS = sm.OLS(y_train, X_Train).fit(cov_type='HAC',cov_kwds={'maxlags':6})
 
         #heading('Out sample fit')
+
+
         ActvsPred = pd.DataFrame({'Actual':y_test.squeeze(),'Predicted':self.model.predict(X_test)})
-        ActvsPred[['Actual','Predicted']].plot(figsize = figsize)
+        ActvsPred[['Actual','Predicted']].plot(figsize = (10,5))
         plt.show()
         OutSampleRMSE = np.sqrt(((ActvsPred['Actual'] - ActvsPred['Predicted'])**2).mean())
         print(colored(f'Out sample RMSE is {OutSampleRMSE: .2f}.',attrs=['bold']))
@@ -141,9 +143,9 @@ class LinearRegOls:
         self.adftests()
         self.residualsummary()
         self.bptest()
-        #self.vif()
-        #self.insample()
-        #self.outsample()
+        self.vif()
+        self.insample()
+        self.outsample()
         pass
 
     def Forecast(self, data):
