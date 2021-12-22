@@ -61,13 +61,28 @@ class LinearRegOls:
         pd.DataFrame(self.model.resid).plot()
         plt.show()
         result = adfuller(self.model.resid, autolag='AIC')
-        print(f'ADF Statistic: {result[0]}')
-        print(f'n_lags: {result[1]}')
+        print(f'ADF Statistic_Residuals: {result[0]}')
+        #print(f'n_lags: {result[1]}')
         print(f'p-value: {result[1]}')
         for key, value in result[4].items():
             print('Critical Values:')
             print(f'   {key}, {value}')
 
+        result_y = adfuller(self.y, autolag='AIC')
+        print(f'ADF Statistic_Y: {result_y[0]}')
+        # print(f'n_lags: {result_y[1]}')
+        print(f'p-value_y: {result_y[1]}')
+        for key, value in result_y[4].items():
+            print('Critical Values_y:')
+            print(f'   {key}, {value}')
+
+        result_X = adfuller(self.X, autolag='AIC')
+        print(f'ADF Statistic_X: {result_X[0]}')
+        # print(f'n_lags: {result[1]}')
+        print(f'p-value_X: {result_X[1]}')
+        for key, value in result_X[4].items():
+            print('Critical Values_X:')
+            print(f'   {key}, {value}')
 
     def residualsummary(self):
         self.regressionexecute()
@@ -160,13 +175,4 @@ class LinearRegOls:
             data = sm.add_constant(data)
         forecast = self.model.predict(data)
         return forecast
-
-
-
-
-
-
-
-
-
 
