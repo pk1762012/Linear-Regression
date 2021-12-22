@@ -18,12 +18,13 @@ from termcolor import colored
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
 import warnings
+
 warnings.filterwarnings('ignore')
 
 
 class LinearRegOls:
 
-    def __init__(self, X, y, constant = True, HAC = True, OOS_begin = None, OOS_end = None):
+    def __init__(self, X, y, constant=True, HAC=True, OOS_begin=None, OOS_end=None):
         self.X = X
         self.y = y
         self.constant = constant
@@ -43,67 +44,69 @@ class LinearRegOls:
         if not self.HAC:
             self.model = sm.OLS(self.y, self.exog).fit()
         else:
-            self.model = sm.OLS(self.y, self.exog).fit(cov_type='HAC',cov_kwds={'maxlags':6})
+            self.model = sm.OLS(self.y, self.exog).fit(cov_type='HAC', cov_kwds={'maxlags': 6})
         pass
 
     def regressionsummary(self):
-        #heading('Summary of Regression')
+        # heading('Summary of Regression')
         self.regressionexecute()
         print(self.model.summary())
 
     def adftests(self):
         self.regressionexecute()
-        #heading()
-        #print(pd.DataFrame(self.model.resid).describe())
-        #print(self.model.resid)
-        #heading('Residual plot')
+        # heading()
+        # print(pd.DataFrame(self.model.resid).describe())
+        # print(self.model.resid)
+        # heading('Residual plot')
 
         pd.DataFrame(self.model.resid).plot()
         plt.show()
         result = adfuller(self.model.resid, autolag='AIC')
         print(f'ADF Statistic_Residuals: {result[0]}')
-        #print(f'n_lags: {result[1]}')
-        print(f'p-value: {result[1]}')
-        for key, value in result[4].items():
-            print('Critical Values:')
-            print(f'   {key}, {value}')
+        # print(f'n_lags: {result[1]}')
+        print(f'p-value residuals: {result[1]}')
+        #for key, value in result[4].items():
+        #    print('Critical Values residuals:')
+        #    print(f'   {key}, {value}')
 
         result_y = adfuller(self.y, autolag='AIC')
         print(f'ADF Statistic_Y: {result_y[0]}')
         # print(f'n_lags: {result_y[1]}')
         print(f'p-value_y: {result_y[1]}')
-        for key, value in result_y[4].items():
-            print('Critical Values_y:')
-            print(f'   {key}, {value}')
+        #for key, value in result_y[4].items():
+        #    print('Critical Values_y:')
+        #    print(f'   {key}, {value}')
 
-        result_X = adfuller(self.X, autolag='AIC')
-        print(f'ADF Statistic_X: {result_X[0]}')
-        # print(f'n_lags: {result[1]}')
-        print(f'p-value_X: {result_X[1]}')
-        for key, value in result_X[4].items():
-            print('Critical Values_X:')
-            print(f'   {key}, {value}')
+        for (columnName, columnData) in self.X.iteritems():
+        #for x in self.X.iteritems():
+            result_X = adfuller(columnData.values, autolag='AIC')
+            print(f'ADF Statistic_X {columnName}: {result_X[0]}')
+            # print(f'n_lags: {result[1]}')
+            print(f'p-value_X {columnName}: {result_X[1]}')
+            #for key, value in result_X[4].items():
+            #    print('Critical Values_X:')
+            #    print(f'   {key}, {value}')
 
     def residualsummary(self):
         self.regressionexecute()
-        #heading('Summary statistics of residuals')
-        #pd.DataFrame(self.model.resid).describe()
-        #heading('Residual plot')
-        #print()
+        # heading('Summary statistics of residuals')
+        # pd.DataFrame(self.model.resid).describe()
+        # heading('Residual plot')
+        # print()
         pd.DataFrame(self.model.resid).plot()
         plt.show()
-        sm.graphics.tsa.plot_acf(self.model.resid, lags = 3)
-        sm.graphics.tsa.plot_pacf(self.model.resid, lags = 3)
+        sm.graphics.tsa.plot_acf(self.model.resid, lags=6)
+        sm.graphics.tsa.plot_pacf(self.model.resid, lags=6)
         plt.show()
 
     def bptest(self):
         self.regressionexecute()
-        #heading('Breusch-Pagan Test')
+        # heading('Breusch-Pagan Test')
         print(smd.het_breuschpagan(self.model.resid, self.model.model.exog))
 
     def vif(self):
         self.regressionexecute()
-        #heading('Test results of VIF')
+        # heading('Test results of VIF')
         vif = pd.DataFrame()
         if not self.constant:
             vif_X = sm.add_constant(self.X)
@@ -116,16 +119,16 @@ class LinearRegOls:
 
     def insample(self):
         self.regressionexecute()
-        #heading('In sample fit')
+        # heading('In sample fit')
         ActvsPred = pd.DataFrame({'Actual': self.y.squeeze(), 'Predicted': self.model.predict(self.exog)})
-        ActvsPred[['Actual', 'Predicted']].plot(figsize = (10,5))
+        ActvsPred[['Actual', 'Predicted']].plot(figsize=(10, 5))
         plt.show()
-        InSampleRMSE = np.sqrt(((ActvsPred['Actual'] - ActvsPred['Predicted'])**2).mean())
+        InSampleRMSE = np.sqrt(((ActvsPred['Actual'] - ActvsPred['Predicted']) ** 2).mean())
         print(colored(f'In-sample RMSE is {InSampleRMSE:.2f}.', attrs=['bold']))
         print()
 
     def outsample(self):
-        #heading(f'Out of Sample test: {self.OOS_begin} to {self.OOS_end}')
+        # heading(f'Out of Sample test: {self.OOS_begin} to {self.OOS_end}')
         self.regressionexecute()
         if (self.OOS_begin is None or self.OOS_end is None):
             X_Train = self.exog.iloc[:-12]
@@ -139,18 +142,17 @@ class LinearRegOls:
             y_test = self.y.iloc[self.OOS_begin:self.OOS_end]
 
         if not self.HAC:
-            self.model_OOS = sm.OLS(y_train,X_Train).fit()
+            self.model_OOS = sm.OLS(y_train, X_Train).fit()
         else:
-            self.model_OOS = sm.OLS(y_train, X_Train).fit(cov_type='HAC',cov_kwds={'maxlags':6})
+            self.model_OOS = sm.OLS(y_train, X_Train).fit(cov_type='HAC', cov_kwds={'maxlags': 6})
 
-        #heading('Out sample fit')
+        # heading('Out sample fit')
 
-
-        ActvsPred = pd.DataFrame({'Actual':y_test.squeeze(),'Predicted':self.model.predict(X_test)})
-        ActvsPred[['Actual','Predicted']].plot(figsize = (10,5))
+        ActvsPred = pd.DataFrame({'Actual': y_test.squeeze(), 'Predicted': self.model.predict(X_test)})
+        ActvsPred[['Actual', 'Predicted']].plot(figsize=(10, 5))
         plt.show()
-        OutSampleRMSE = np.sqrt(((ActvsPred['Actual'] - ActvsPred['Predicted'])**2).mean())
-        print(colored(f'Out sample RMSE is {OutSampleRMSE: .2f}.',attrs=['bold']))
+        OutSampleRMSE = np.sqrt(((ActvsPred['Actual'] - ActvsPred['Predicted']) ** 2).mean())
+        print(colored(f'Out sample RMSE is {OutSampleRMSE: .2f}.', attrs=['bold']))
         print()
 
     def runall(self):
@@ -175,4 +177,3 @@ class LinearRegOls:
             data = sm.add_constant(data)
         forecast = self.model.predict(data)
         return forecast
-
